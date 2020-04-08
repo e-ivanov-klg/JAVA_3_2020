@@ -39,45 +39,7 @@ public class Autentification {
                 default:
                     System.err.println("Unknown type of command: " + command.getType());
             }
-
         }
-        /*String message = null   ;
-        String login = null;
-        String password = null;
-        int startIndex;
-        int endIndex;
-
-        out = new ObjectOutputStream(clientSocket.getOutputStream());
-        in = new ObjectInputStream(clientSocket.getInputStream());
-        while (true){
-            message = in.readUTF();
-            System.out.println(message);
-            if (message.indexOf("cancell") != -1) break;
-            startIndex = message.indexOf("login=<") + 7;
-            endIndex = message.indexOf(">", startIndex);
-            if (startIndex != -1 && endIndex != -1)login = message.substring(startIndex,endIndex);
-            if (login == null){
-                sendMessage("/deny");
-                continue;
-            }
-            startIndex = message.indexOf("password=<") + 10;
-            endIndex = message.indexOf(">", startIndex);
-            if (startIndex != -1 && endIndex != -1) password = message.substring(startIndex,endIndex);
-            if (password == null) {
-                sendMessage("/deny");
-                continue;
-            }
-//            System.out.println(login);
-//            System.out.println(password);
-//            System.out.println(users.get(login));
-            if (users.get(login).equals(password)) {
-                result = login;
-                sendMessage("/accept");
-                break;
-            }
-*/
-
-        //return (users.get(login) == password);
     }
 
     private void sendMessage(String outMessage) throws IOException {

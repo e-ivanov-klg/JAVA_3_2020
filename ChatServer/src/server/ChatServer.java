@@ -4,7 +4,7 @@ import Command.UserData;
 import com.sun.corba.se.impl.encoding.BufferManagerWrite;
 import org.sqlite.jdbc3.JDBC3Connection;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -78,5 +78,22 @@ public class ChatServer {
             return true;
         }
         else return false;
+    }
+
+    public boolean checkCensor(String message) {
+        String stringLine;
+        File censorFile = new File(System.getProperty("user.dir") + "/censor.list");
+        try (BufferedReader reader = new BufferedReader(new FileReader(censorFile))) {
+            while ((stringLine = reader. readLine()) != null) {
+                if (message.indexOf(stringLine) != -1) {
+                    return false;
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        };
+        return true;
     }
 }
