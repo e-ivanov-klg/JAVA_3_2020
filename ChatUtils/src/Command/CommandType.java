@@ -1,0 +1,11 @@
+package Command;
+
+public enum CommandType {
+    AUTH, REGISTER_NEW_USER,
+    PRIVATE_MESSAGE, BROADCAST_MESSAGE,
+    UPDATE_USER_LIST,
+    AUTH_ERROR, CENSORE_ERROR,
+    END,
+    CHANGE_USER_DATA;
+}
+
