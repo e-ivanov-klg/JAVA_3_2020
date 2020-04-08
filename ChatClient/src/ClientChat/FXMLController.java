@@ -1,12 +1,8 @@
 package ClientChat;
 
 import Command.*;
-import com.sun.webkit.dom.MouseEventImpl;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,16 +38,19 @@ public class FXMLController {
     //FXCollections.observableArrayList();
     private Map<String, List<String>> userMessageList = new HashMap<>();
     // Map<login, message list>
+    ChatFileStream userLogFile;
     @FXML
     private void onSendButtonClick(ActionEvent actionEvent) throws IOException {
         int selectedIndex = usersListView.getFocusModel().getFocusedIndex();
         if ( selectedIndex == -1) { return; };
         if (messageTextBox.getText().length() == 0) { return; }
         UserData recipient = (UserData) usersListView.getItems().get(selectedIndex);
+        UserData sender = clientConnection.getUser();
         String message = messageTextBox.getText();
-        clientConnection.sendCommand(Command.privateMessage(recipient, clientConnection.getUser(), message));
-        updateDialogList(recipient.getLogin(), clientConnection.getUserName(), message);
+        clientConnection.sendCommand(Command.privateMessage(recipient, sender, message));
+        updateDialogList(recipient.getLogin(), sender.getFullName(), message);
         System.out.println("Message is send !!!");
+        userLogFile.AddMessageToLog(recipient, message);
     }
 
     @FXML
@@ -82,7 +81,8 @@ public class FXMLController {
         }
         System.out.println("AfterLogin");
         userNameLabel.setText(clientConnection.getUserName());
-        clientConnection.sendCommand(Command.updateUserList(null));
+        //clientConnection.sendCommand(Command.updateUserList(null));
+        userLogFile = new ChatFileStream(clientConnection.getUser().getLogin());
         Thread inThread = new Thread(()-> {
             try {
                 readCommand();
@@ -99,6 +99,8 @@ public class FXMLController {
             switch (inCommand.getType()) {
                 case UPDATE_USER_LIST: {
                      updateUserList((UpdateUserListCommand) inCommand.getData());
+                     //userLogFile.fillFile(usersListView.getItems());
+                     if (usersListView.getItems().size() !=0) readChatLog();
                      break;
                 }
                 case PRIVATE_MESSAGE: {
@@ -118,12 +120,33 @@ public class FXMLController {
                     clientConnection.getUser().getCopy(user.getNewUser());
                     break;
                 }
+                case CENSORE_ERROR: {
+                    ErrorCommand command = (ErrorCommand) inCommand.getData();
+                    showAlert(command.getErrorMessage());
+                    return;
+                }
                 case END: {
                     System.out.println("Server close client connection...");
                     clientConnection.closeConnection();
                     return;
                 }
             }
+        }
+    }
+
+    private void readChatLog() throws IOException {
+        String[] newLine = new String[4];
+        String newString;
+        int lineCounter = 0;
+        while (lineCounter < 101){
+            newString = userLogFile.getLogLine();
+            if (newString == null) return;
+            newLine = newString.split("=>");
+            if (newLine[1] == null) return;
+            if (userMessageList.containsKey(newLine[1])) {
+                userMessageList.get(newLine[1]).add(newLine[2]);
+            }
+            lineCounter++;
         }
     }
 
@@ -143,6 +166,7 @@ public class FXMLController {
 
     private void updateUserList(UpdateUserListCommand command) {
         List<UserData> usersList = command.getUsersList();
+        int listIndex = usersListView.getFocusModel().getFocusedIndex();
         for (UserData user : usersList) {
             if (!usersListView.getItems().contains(user)) {
                 if (!user.equals(clientConnection.getUser())) {
@@ -155,6 +179,7 @@ public class FXMLController {
                 changeUserList(user);
             }
         }
+        usersListView.getFocusModel().focus(listIndex);
     }
 
     public void userListOnMouseClick(MouseEvent mouseEvent) {
@@ -190,6 +215,18 @@ public class FXMLController {
                 clientConnection.sendCommand(Command.changeUserData(clientConnection.getUser(), newUser));
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        });
+    }
+    private void showAlert (String message){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Отправка сообщения !");
+                alert.setHeaderText("Адресат не получет ваше сообщение ...");
+                alert.setContentText(message);
+                alert.showAndWait();
             }
         });
     }

@@ -32,6 +32,7 @@ public class ClientChatApp extends Application {
             public void handle(WindowEvent event) {
                 try {
                     clientConnection.sendCommand(Command.endConnection());
+                    ChatFileStream.closeStream();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -74,12 +74,16 @@ public class ClientConnection {
                 case PRIVATE_MESSAGE: {
                     PrivateMessageCommand messageCommand = (PrivateMessageCommand) command.getData();
                     ClientConnection recipientConnection = server.getClient(messageCommand.getRecipient().getLogin());
+                    if (server.checkCensor(messageCommand.getMessage())) {
+                        recipientConnection.sendCommand(command);
+                    } else {
+                        recipientConnection.sendCommand(Command.sensorErrorComand());
+                    }
                     if (recipientConnection == null) {
                         // replace sendComman (ERROR)
-                        this.sendMessage("Адресат не подключен к серверу !!!");
                         continue;
                     }
-                    recipientConnection.sendCommand(command);
+
                     break;
                 }
                 case UPDATE_USER_LIST: {

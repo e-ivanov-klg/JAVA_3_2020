@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="ChatCommad" exported="" />
+    <orderEntry type="module" module-name="ChatUtils" exported="" />
     <orderEntry type="library" name="sqlite-jdbc-3.8.11.2" level="project" />
   </component>
 </module>

@@ -60,4 +60,11 @@ public class Command implements Serializable {
         command.data = null;
         return command;
     }
+
+    public static Command sensorErrorComand (){
+        Command command = new Command();
+        command.type = CommandType.CENSORE_ERROR;
+        command.data = new ErrorCommand("Mesage content censored words !!!");
+        return command;
+    }
 }
