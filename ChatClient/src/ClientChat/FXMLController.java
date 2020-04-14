@@ -184,7 +184,6 @@ public class FXMLController {
 
     public void userListOnMouseClick(MouseEvent mouseEvent) {
         int selectedIndex = usersListView.getFocusModel().getFocusedIndex();
-        System.out.println(selectedIndex);
         if ( selectedIndex == -1) { return; };
         UserData user = (UserData) usersListView.getItems().get(selectedIndex);
         dialogListView.setItems(FXCollections.observableArrayList(userMessageList.get(user.getLogin())));
@@ -192,13 +191,16 @@ public class FXMLController {
 
     private void updateDialogList(String recipient, String sender, String newMessage) {
         userMessageList.get(recipient).add(sender + ": " + newMessage);
-        /*Platform.runLater(new Runnable() {
+        Platform.runLater(new Runnable() {
             @Override
-            public void run() {*/
+            public void run() {
+                int selectedIndex = usersListView.getFocusModel().getFocusedIndex();
                 dialogListView.setItems(null);
                 dialogListView.setItems(FXCollections.observableArrayList(userMessageList.get(recipient)));
-            /*}
-        });*/
+                usersListView.getFocusModel().focus(selectedIndex);
+                dialogListView.getFocusModel().focus(dialogListView.getItems().size());
+            }
+        });
     }
 
     public void onUserNameLabelClick(MouseEvent mouseEvent) {

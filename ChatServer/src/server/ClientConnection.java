@@ -7,10 +7,12 @@ import server.Autentification;
 import server.ChatServer;
 import Command.ChangeUserData;
 
+import javax.management.remote.rmi._RMIConnection_Stub;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class ClientConnection {
 
@@ -33,7 +35,7 @@ public class ClientConnection {
     }
 
     public void run (){
-        Thread clientThread = new Thread(()-> {
+        //Thread clientThread = new Thread(()-> {
             try {
                 if (!authNewClient()) {
                     System.out.println("Autentification failed !");
@@ -48,8 +50,8 @@ public class ClientConnection {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        });
-        clientThread.start();
+        //});
+        //clientThread.start();
     }
     public Command readCommand () throws IOException{
         try {
@@ -74,6 +76,9 @@ public class ClientConnection {
                 case PRIVATE_MESSAGE: {
                     PrivateMessageCommand messageCommand = (PrivateMessageCommand) command.getData();
                     ClientConnection recipientConnection = server.getClient(messageCommand.getRecipient().getLogin());
+                    String logMessage = "Client <" + user.getLogin() + "> send message: <" + messageCommand.getMessage() + "> ";
+                    logMessage = logMessage.concat("to user <" + recipientConnection.user.getLogin()+ ">");
+                    server.getServerLogger().log(Level.SEVERE, logMessage);
                     if (server.checkCensor(messageCommand.getMessage())) {
                         recipientConnection.sendCommand(command);
                     } else {
@@ -87,6 +92,8 @@ public class ClientConnection {
                     break;
                 }
                 case UPDATE_USER_LIST: {
+                    String logMessage = "Client <" + user.getLogin() + "> Send UPDATE_USER_LIST commnd";
+                    server.getServerLogger().log(Level.SEVERE, logMessage);
                     sendBroadcastMessage(Command.updateUserList(server.getUserList()));
                     break;
                 }
@@ -108,6 +115,8 @@ public class ClientConnection {
                     sendCommand(Command.endConnection());
                     closeConnection();
                     server.removeClient(this);
+                    String logMessage = "Client <" + user.getLogin() + "> close connection to SERVER.";
+                    server.getServerLogger().log(Level.SEVERE, logMessage);
                     return;
                 }
             }
